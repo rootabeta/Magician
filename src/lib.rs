@@ -6,14 +6,14 @@ use std::time::Duration;
 use toml::Table;
 use ureq::Agent;
 
-pub struct Nation { 
+pub struct Nation {
     pub nation: String,
-    pub password: String
+    pub password: String,
 }
 
-pub struct Config { 
+pub struct Config {
     pub main_nation: String,
-    pub nations: Vec<Nation>
+    pub nations: Vec<Nation>,
 }
 
 fn canonicalize(string: &str) -> String {
@@ -22,7 +22,7 @@ fn canonicalize(string: &str) -> String {
     return str::replace(output.as_str(), " ", "_");
 }
 
-pub fn load_config(config_file: &str) -> Result<Config, Error> { 
+pub fn load_config(config_file: &str) -> Result<Config, Error> {
     let config_contents = std::fs::read_to_string(config_file)?;
     let raw_config: Table = toml::from_str(&config_contents)?;
     let mut nations = Vec::new();
@@ -36,55 +36,56 @@ pub fn load_config(config_file: &str) -> Result<Config, Error> {
         .expect("Could not unwrap main_nation as string!")
         .to_string();
 
-    let puppets = raw_config.get("puppets")
+    let puppets = raw_config
+        .get("puppets")
         .expect("Did not find [puppets] block in config.toml!")
         .as_table()
         .expect("Could not parse puppets as table!");
 
-    for puppet in puppets.keys() { 
+    for puppet in puppets.keys() {
         let nation = puppet;
         let password = puppets.get(puppet).unwrap().as_str().unwrap();
 
-        let new_nation: Nation = Nation{
+        let new_nation: Nation = Nation {
             nation: canonicalize(&nation.to_string()),
-            password: password.to_string()
+            password: password.to_string(),
         };
 
         nations.push(new_nation);
     }
 
-    let config: Config = Config{
+    let config: Config = Config {
         main_nation,
-        nations
+        nations,
     };
 
     Ok(config)
 }
 
 #[derive(Deserialize)]
-struct Issue { 
-    id: u32
+struct Issue {
+    id: u32,
 }
 
 #[derive(Deserialize)]
-struct Issues { 
-    #[serde(alias="ISSUE")]
-    issue: Vec<Issue>
+struct Issues {
+    #[serde(alias = "ISSUE")]
+    issue: Vec<Issue>,
 }
 
 #[derive(Deserialize)]
-struct NationResponse { 
-    #[serde(alias="ISSUES")]
-    issues: Issues
+struct NationResponse {
+    #[serde(alias = "ISSUES")]
+    issues: Issues,
 }
 
 #[derive(Deserialize)]
-struct Packs { 
-    #[serde(alias="PACKS")]
-    packs: u32
+struct Packs {
+    #[serde(alias = "PACKS")]
+    packs: u32,
 }
 
-pub fn get_issues(agent: &Agent, nation: &str, password: &str) -> Result<Option<Vec<u32>>, Error> { 
+pub fn get_issues(agent: &Agent, nation: &str, password: &str) -> Result<Option<Vec<u32>>, Error> {
     let mut issue_ids = Vec::new();
 
     let url = format!(
@@ -100,27 +101,23 @@ pub fn get_issues(agent: &Agent, nation: &str, password: &str) -> Result<Option<
 
     let response = from_str(&response);
 
-    if response.is_ok() { 
+    if response.is_ok() {
         let response: NationResponse = response.unwrap();
 
-        for issue in response.issues.issue { 
+        for issue in response.issues.issue {
             issue_ids.push(issue.id);
         }
         // Rate limit
-        sleep(
-            Duration::from_millis(750)
-        );
+        sleep(Duration::from_millis(750));
 
         Ok(Some(issue_ids))
-    } else { 
-        sleep(
-            Duration::from_millis(750)
-        );
+    } else {
+        sleep(Duration::from_millis(750));
         Ok(None)
     }
 }
 
-pub fn get_packs(agent: &Agent, nation: &str, password: &str) -> Result<u32, Error> { 
+pub fn get_packs(agent: &Agent, nation: &str, password: &str) -> Result<u32, Error> {
     let url = format!(
         "https://www.nationstates.net/cgi-bin/api.cgi?q=packs&nation={}",
         nation
@@ -135,9 +132,7 @@ pub fn get_packs(agent: &Agent, nation: &str, password: &str) -> Result<u32, Err
     let response: Packs = from_str(&response)?;
 
     // Rate limit
-    sleep(
-        Duration::from_millis(750)
-    ); 
+    sleep(Duration::from_millis(750));
 
     Ok(response.packs)
 }

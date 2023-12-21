@@ -60,7 +60,9 @@ fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
                 packs
             );
 
-            let _ = writeln!(file, "{}", pack_link);
+            for _ in 0..packs { 
+                let _ = writeln!(file, "{}", pack_link);
+            }
         }
         //        println!("Fetched {0} packs for {1}", packs, nation.nation);
         inc_progress_bar();

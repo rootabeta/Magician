@@ -1,0 +1,7 @@
+[config]
+main_nation = "your_main_nation"
+
+[puppets]
+"puppet_1" = "password"
+"puppet_2" = "password"
+"puppet_3" = "password"

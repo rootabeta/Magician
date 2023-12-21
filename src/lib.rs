@@ -35,9 +35,6 @@ pub fn load_config(config_file: &str) -> Result<Config, Error> {
         .as_str()
         .expect("Could not unwrap main_nation as string!")
         .to_string();
-        
-    println!("Got main nation \"{0}\"", main_nation);
-
 
     let puppets = raw_config.get("puppets")
         .expect("Did not find [puppets] block in config.toml!")

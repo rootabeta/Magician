@@ -111,7 +111,7 @@ fn main() {
 
     let api_agent: Agent = AgentBuilder::new()
         .user_agent(&user_agent)
-        .timeout(Duration::from_secs(5))
+        .timeout(Duration::from_secs(15))
         .build();
 
     let outfile = match mode { 

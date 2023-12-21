@@ -1,5 +1,6 @@
 use anyhow::Error;
 use inquire::Select;
+use progress_bar::*;
 use std::fs::File;
 use std::io::Write;
 use std::time::Duration;
@@ -10,10 +11,20 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
     let filename = "issues.html";
     let mut file = File::create(filename)?;
 
+    init_progress_bar(config.nations.len());
+    set_progress_bar_action("Loading", Color::Blue, Style::Bold);
+
     for nation in config.nations { 
         let issues = get_issues(&agent, &nation.nation, &nation.password)?;
         if issues.is_some() { 
-            for issue in issues.unwrap() { 
+            let issues = issues.unwrap();
+            let progress_message = format!("Fetched {} issues for {}", 
+                issues.len(), 
+                &nation.nation
+            );
+
+            print_progress_bar_info("Success", &progress_message, Color::Green, Style::Bold);
+            for issue in issues { 
                 let issue_link = format!(
                     "https://www.nationstates.net/container={}/template-overall=none/page=show_dilemma/dilemma={}",
                     nation.nation,
@@ -29,8 +40,10 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
                 writeln!(file, "{}", issue_link)?;
             }
         }
-        println!("Fetched issues for {0}", nation.nation);
+        inc_progress_bar();
     }
+
+    finalize_progress_bar();
 
     Ok(filename.to_string())
 }
@@ -38,9 +51,18 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
 fn do_packs(config: Config, agent: Agent) -> Result<String, Error> { 
     let filename = "packs.html";
     let mut file = File::create(filename)?;
+    init_progress_bar(config.nations.len());
+    set_progress_bar_action("Loading", Color::Blue, Style::Bold);
     for nation in config.nations { 
         let packs = get_packs(&agent, &nation.nation, &nation.password)?;
         if packs > 0 { 
+            let progress_message = format!("Fetched {} issues for {}", 
+                packs,
+                &nation.nation
+            );
+
+            print_progress_bar_info("Success", &progress_message, Color::Green, Style::Bold);
+
             let pack_link = format!(
                         "https://www.nationstates.net/container={}/template-overall=none/page=deck",
                         nation.nation,
@@ -54,9 +76,11 @@ fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
 
             let _ = writeln!(file, "{}", pack_link);
         }
-        println!("Fetched {0} packs for {1}", packs, nation.nation);
+//        println!("Fetched {0} packs for {1}", packs, nation.nation);
+        inc_progress_bar();
     }
 
+    finalize_progress_bar();
     Ok(filename.to_string())
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "magician"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.76"
 inquire = "0.6.2"
+progress_bar = "1.0.5"
 serde = { version = "1.0.193", features = ["derive"] }
 serde-xml-rs = "0.6.0"
 toml = "0.8.8"

@@ -116,6 +116,9 @@ pub fn get_issues(agent: &Agent, nation: &str, password: &str) -> Result<Option<
 
         Ok(Some(issue_ids))
     } else { 
+        sleep(
+            Duration::from_millis(750)
+        );
         Ok(None)
     }
 }

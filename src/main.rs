@@ -60,7 +60,7 @@ fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
                 packs
             );
 
-            for _ in 0..packs { 
+            for _ in 0..packs {
                 let _ = writeln!(file, "{}", pack_link);
             }
         }

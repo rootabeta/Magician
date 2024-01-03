@@ -17,7 +17,8 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
     for nation in config.nations {
         let issues = get_issues(&agent, &nation.nation, &nation.password)?;
         if issues.is_some() {
-            for issue in issues.unwrap() {
+            let issues = issues.unwrap();
+            for issue in issues.iter() { 
                 let issue_link = format!(
                     "https://www.nationstates.net/container={}/template-overall=none/page=show_dilemma/dilemma={}",
                     nation.nation,
@@ -32,7 +33,21 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
 
                 writeln!(file, "{}", issue_link)?;
             }
+
+            let status_msg = format!("fetched {} issues for {}", 
+                issues.len(), 
+                nation.nation
+            );
+
+            print_progress_bar_info("Success", &status_msg, Color::Green, Style::Bold);
+        } else {
+            let status_msg = format!("Could not fetch issues for {}",
+                nation.nation
+            );
+
+            print_progress_bar_info("Failed", &status_msg, Color::Red, Style::Normal);
         }
+
         inc_progress_bar();
     }
 
@@ -47,24 +62,37 @@ fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
     init_progress_bar(config.nations.len());
     set_progress_bar_action("Loading", Color::Blue, Style::Bold);
     for nation in config.nations {
-        let packs = get_packs(&agent, &nation.nation, &nation.password)?;
-        if packs > 0 {
-            let pack_link = format!(
-                "https://www.nationstates.net/container={}/template-overall=none/page=deck",
-                nation.nation,
-            );
+        if let Ok(packs) = get_packs(&agent, &nation.nation, &nation.password) {
+            if packs > 0 {
+                let pack_link = format!(
+                    "https://www.nationstates.net/container={}/template-overall=none/page=deck",
+                    nation.nation,
+                );
 
-            let pack_link = format!("<div class=packs><a class=\"login_link\" onclick=\"document.getElementsByClassName('packs')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
-                pack_link,
-                nation.nation,
-                packs
-            );
+                let pack_link = format!("<div class=packs><a class=\"login_link\" onclick=\"document.getElementsByClassName('packs')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
+                    pack_link,
+                    nation.nation,
+                    packs
+                );
 
-            for _ in 0..packs {
-                let _ = writeln!(file, "{}", pack_link);
+                for _ in 0..packs {
+                    let _ = writeln!(file, "{}", pack_link);
+                }
+
+                let status_msg = format!("Fetched {} packs for {}", 
+                    packs,
+                    nation.nation
+                );
+
+                print_progress_bar_info("Success", &status_msg, Color::Green, Style::Bold);
             }
+        } else { 
+            let status_msg = format!("Failed to fetch packs for {}",
+                nation.nation
+            );
+
+            print_progress_bar_info("Failed", &status_msg, Color::Red, Style::Normal);
         }
-        //        println!("Fetched {0} packs for {1}", packs, nation.nation);
         inc_progress_bar();
     }
 

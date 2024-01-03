@@ -15,31 +15,39 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
     set_progress_bar_action("Loading", Color::Blue, Style::Bold);
 
     for nation in config.nations {
-        let issues = get_issues(&agent, &nation.nation, &nation.password)?;
-        if issues.is_some() {
-            let issues = issues.unwrap();
-            for issue in issues.iter() { 
-                let issue_link = format!(
-                    "https://www.nationstates.net/container={}/template-overall=none/page=show_dilemma/dilemma={}",
-                    nation.nation,
-                    issue
+        if let Ok(issues) = get_issues(&agent, &nation.nation, &nation.password) { 
+            if issues.is_some() {
+                let issues = issues.unwrap();
+                for issue in issues.iter() { 
+                    let issue_link = format!(
+                        "https://www.nationstates.net/container={}/template-overall=none/page=show_dilemma/dilemma={}",
+                        nation.nation,
+                        issue
+                    );
+
+                    let issue_link = format!("<div class=issue><a class=\"login_link\" onclick=\"document.getElementsByClassName('issue')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
+                        issue_link,
+                        nation.nation,
+                        issue
+                    );
+
+                    writeln!(file, "{}", issue_link)?;
+                }
+                let status_msg = format!("fetched {} issues for {}", 
+                    issues.len(), 
+                    nation.nation
                 );
 
-                let issue_link = format!("<div class=issue><a class=\"login_link\" onclick=\"document.getElementsByClassName('issue')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
-                    issue_link,
-                    nation.nation,
-                    issue
+                print_progress_bar_info("Success", &status_msg, Color::Green, Style::Bold);
+            // Issues == None
+            } else { 
+                let status_msg = format!("fetched 0 issues for {}", 
+                    nation.nation
                 );
 
-                writeln!(file, "{}", issue_link)?;
+                print_progress_bar_info("Success", &status_msg, Color::Green, Style::Bold);
             }
-
-            let status_msg = format!("fetched {} issues for {}", 
-                issues.len(), 
-                nation.nation
-            );
-
-            print_progress_bar_info("Success", &status_msg, Color::Green, Style::Bold);
+        // Issues failed to fetch
         } else {
             let status_msg = format!("Could not fetch issues for {}",
                 nation.nation

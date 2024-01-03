@@ -93,6 +93,12 @@ fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
                 );
 
                 print_progress_bar_info("Success", &status_msg, Color::Green, Style::Bold);
+            } else { 
+                let status_msg = format!("Fetched 0 packs for {}", 
+                    nation.nation
+                );
+
+                print_progress_bar_info("Success", &status_msg, Color::Green, Style::Bold);
             }
         } else { 
             let status_msg = format!("Failed to fetch packs for {}",

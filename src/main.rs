@@ -25,7 +25,7 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
                         issue
                     );
 
-                    let issue_link = format!("<div class=issue><a class=\"login_link\" onclick=\"document.getElementsByClassName('issue')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
+                    let issue_link = format!("<div class=issue><a class=\"issue_link\" onauxclick=\"document.getElementsByClassName('issue')[0].remove();\" onclick=\"document.getElementsByClassName('issue')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
                         issue_link,
                         nation.nation,
                         issue
@@ -77,7 +77,7 @@ fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
                     nation.nation,
                 );
 
-                let pack_link = format!("<div class=packs><a class=\"login_link\" onclick=\"document.getElementsByClassName('packs')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
+                let pack_link = format!("<div class=packs><a class=\"pack_link\" onauxclick=\"document.getElementsByClassName('packs')[0].remove();\" onclick=\"document.getElementsByClassName('packs')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
                     pack_link,
                     nation.nation,
                     packs
@@ -131,7 +131,7 @@ fn do_logins(config: Config) -> Result<String, Error> {
             nation.nation
         );
 
-        let nation_line = format!("<div class=puppet><a class=\"login_link\" onclick=\"document.getElementsByClassName('puppet')[0].remove();\" target=\"_blank\" href={}>{}</a><br></div>",
+        let nation_line = format!("<div class=puppet><a class=\"login_link\" onauxclick=\"document.getElementsByClassName('packs')[0].remove();\" onclick=\"document.getElementsByClassName('puppet')[0].remove();\" target=\"_blank\" href={}>{}</a><br></div>",
             login_link,
             nation.nation
         );

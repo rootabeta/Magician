@@ -7,7 +7,7 @@ use std::io::Write;
 use std::time::Duration;
 use ureq::{Agent, AgentBuilder};
 
-fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
+fn do_issues(config: Config, agent: Agent, user_agent: &str) -> Result<String, Error> {
     let filename = "issues.html";
     let mut file = File::create(filename)?;
 
@@ -20,9 +20,10 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
                 let issues = issues.unwrap();
                 for issue in issues.iter() { 
                     let issue_link = format!(
-                        "https://www.nationstates.net/container={}/template-overall=none/page=show_dilemma/dilemma={}",
+                        "https://www.nationstates.net/container={}/template-overall=none/page=show_dilemma/dilemma={}/script={}",
                         nation.nation,
-                        issue
+                        issue, 
+                        user_agent
                     );
 
                     let issue_link = format!("<div class=issue><a class=\"issue_link\" onauxclick=\"document.getElementsByClassName('issue')[0].remove();\" onclick=\"document.getElementsByClassName('issue')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
@@ -64,7 +65,7 @@ fn do_issues(config: Config, agent: Agent) -> Result<String, Error> {
     Ok(filename.to_string())
 }
 
-fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
+fn do_packs(config: Config, agent: Agent, user_agent: &str) -> Result<String, Error> {
     let filename = "packs.html";
     let mut file = File::create(filename)?;
     init_progress_bar(config.nations.len());
@@ -73,8 +74,9 @@ fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
         if let Ok(packs) = get_packs(&agent, &nation.nation, &nation.password) {
             if packs > 0 {
                 let pack_link = format!(
-                    "https://www.nationstates.net/container={}/template-overall=none/page=deck",
+                    "https://www.nationstates.net/container={}/template-overall=none/page=deck/script={}",
                     nation.nation,
+                    user_agent,
                 );
 
                 let pack_link = format!("<div class=packs><a class=\"pack_link\" onauxclick=\"document.getElementsByClassName('packs')[0].remove();\" onclick=\"document.getElementsByClassName('packs')[0].remove();\" target=\"_blank\" href={}>{} ({})</a><br></div>",
@@ -114,7 +116,7 @@ fn do_packs(config: Config, agent: Agent) -> Result<String, Error> {
     Ok(filename.to_string())
 }
 
-fn do_logins(config: Config) -> Result<String, Error> {
+fn do_logins(config: Config, user_agent: &str) -> Result<String, Error> {
     let filename = "logins.html";
     let containers = "containerize.txt";
     let mut file = File::create(filename)?;
@@ -127,8 +129,9 @@ fn do_logins(config: Config) -> Result<String, Error> {
         );
 
         let login_link = format!(
-            "https://www.nationstates.net/container={}/template-overall=none/page=login",
-            nation.nation
+            "https://www.nationstates.net/container={}/template-overall=none/page=login/script={}",
+            nation.nation, 
+            user_agent,
         );
 
         let nation_line = format!("<div class=puppet><a class=\"login_link\" onauxclick=\"document.getElementsByClassName('packs')[0].remove();\" onclick=\"document.getElementsByClassName('puppet')[0].remove();\" target=\"_blank\" href={}>{}</a><br></div>",
@@ -161,6 +164,10 @@ fn main() {
         env!("CARGO_PKG_VERSION"),
         config.main_nation
     );
+    let url_user_agent = format!("magician_version_{0}__developed_by_Volstrostia__used_by_{1}",
+        env!("CARGO_PKG_VERSION"),
+        config.main_nation,
+    );
 
     let api_agent: Agent = AgentBuilder::new()
         .user_agent(&user_agent)
@@ -168,9 +175,9 @@ fn main() {
         .build();
 
     let outfile = match mode {
-        "Answer Issues" => do_issues(config, api_agent),
-        "Open Packs" => do_packs(config, api_agent),
-        "Log In" => do_logins(config),
+        "Answer Issues" => do_issues(config, api_agent, &url_user_agent),
+        "Open Packs" => do_packs(config, api_agent, &url_user_agent),
+        "Log In" => do_logins(config, &url_user_agent),
         "Exit" => {
             println!("Goodbye");
             return;
